@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import styled from 'styled-components';
 import Profile from './public/profile.svg';
 import Date from './public/date.svg';
@@ -43,6 +43,10 @@ const Img = styled.img`
 `;
 
 export default function InputWithoutName({field, changeFieldValue, blockline, line, blockId}){
+    const [value, setValue] = useState('');
+    useEffect(() => {
+        setValue(field.value);
+    }, [field]);
     const changeValue = (event) => {
         changeFieldValue(line, blockId, blockline, field.id, event.target.value);
     };
@@ -63,7 +67,7 @@ export default function InputWithoutName({field, changeFieldValue, blockline, li
     return(
         <>
             <Field key={field.id}>
-                <Input placeholder={field.name}
+                <Input placeholder={field.name} value={value}
                     onChange={changeValue}/>
                 {img}
             </Field>

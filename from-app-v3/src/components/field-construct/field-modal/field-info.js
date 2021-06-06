@@ -59,16 +59,6 @@ export default function FieldInfo({field, changeContent}){
             break;
         }
         break;
-    case('TITLE'):
-        content=<FormInput>
-            <Select variant='outlined' value={style} onChange={(event) => changeContent(event.target.value, 0)}>
-                <MenuItem disabled>Select position</MenuItem>
-                <MenuItem value='flex-start'>left</MenuItem>
-                <MenuItem value='flex-end'>right</MenuItem>
-                <MenuItem value='center'>center</MenuItem>
-            </Select>
-        </FormInput>;
-        break;
     case('CHECKBOX'):
         content = <FormInput>
             <ThemeProvider theme={theme}>

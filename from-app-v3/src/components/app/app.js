@@ -50,51 +50,81 @@ export default function App() {
     const [forms, setForms] = useState([]);
     const [formId, setFormId] = useState('');
     const updateBlocks = (newBlocks) => {
-        setBlocks(newBlocks);
+        try{
+            setBlocks(newBlocks);
+        }
+        catch(error){
+            console.log(error);
+        }
     };
     const updateRules = (newRules) => {
-        setRules(newRules);
+        try{
+            setRules(newRules);
+        }
+        catch(error){
+            console.log(error);
+        }
     };
     const formService = new FormService();
     const updateFormList = (forms) => {
-        const formsInfo = forms.map(item => {
-            return {id: item.id, name: item.name};
-        });
-        setForms(formsInfo);
+        try{
+            const formsInfo = forms.map(item => {
+                return {id: item.id, name: item.name};
+            });
+            setForms(formsInfo);
+        }
+        catch(error){
+            console.log(error);
+        }
     };
     const updateForms = () => {
-        formService
-            .getAllForms()
-            .then(updateFormList);
+        try{
+            formService
+                .getAllForms()
+                .then(updateFormList);
+        }
+        catch(error){
+            alert(error);
+        }
     };
     useEffect(() => {
         updateForms();
     }, []);
     const updateForm = (form) => {
-        setBlocks(form.blocks);
-        setRules(prevRules => {
-            let rules = [];
-            form.lines.forEach(line => {
-                const blocks = line.blocks.map(block => {
-                    if (block.blockType === 'rule')
-                        return block;
+        try{
+            setBlocks(form.blocks);
+            setRules(prevRules => {
+                let rules = [];
+                form.lines.forEach(line => {
+                    const blocks = line.blocks.map(block => {
+                        if (block.blockType === 'rule')
+                            return block;
+                    });
+                    rules = [...rules, ...blocks];
                 });
-                rules = [...rules, ...blocks];
+                rules = rules.filter(rule => rule !== undefined);
+                if (rules.length === 0)
+                    return [...prevRules];
+                else {
+                    prevRules = rules;
+                    return [...prevRules];
+                }
             });
-            rules = rules.filter(rule => rule !== undefined);
-            if (rules.length === 0)
-                return [...prevRules];
-            else {
-                prevRules = rules;
-                return [...prevRules];
-            }
-        });
+        }
+        catch(error){
+            alert(error);
+        }
     };
     const selectForm = (event) => {
-        setFormId(event.target.value);
-        formService
-            .getForm(event.target.value)
-            .then(updateForm);
+        try{
+            setFormId(event.target.value);
+            formService
+                .getForm(event.target.value)
+                .then(updateForm);
+        }
+        catch(error){
+            alert(error);
+        }
     };
     const renderFunc = () => {
         localStorage.clear();

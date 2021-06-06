@@ -68,6 +68,9 @@ const Form = styled.div`
 export default function FieldModal({open, addField, receivedField}){
     const classes = useStyles();
     const [field, setField] = useState({style: 'INPUT', content: []});
+    const [type, setType] = useState('');
+    const [style, setStyle] = useState('');
+    const [subStyle, setSubStyele] = useState('');
     const [types] = useState(['INT', 'STR', 'TEXT']);
     const [styles] = useState(['INPUT', 'TITLE', 'SELECT', 'CHECKBOX']);
     const [subStyles] = useState([{name: 'INPUT', items: ['NAME', 'NONAME']},
@@ -75,9 +78,18 @@ export default function FieldModal({open, addField, receivedField}){
         {name: 'SELECT', items: ['TWOSMALL']},
         {name: 'CHECKBOX', items: ['ARROW', 'CLASSIC']}
     ]);
+    const [value, setValue] = useState('');
     useEffect(() => {
         setField(receivedField);
+        setType(receivedField.type);
+        setStyle(receivedField.style);
+        setSubStyele(receivedField.subStyle);
     }, [receivedField]);
+    useEffect(() => {
+        setType(field.type);
+        setStyle(field.style);
+        setSubStyele(field.subStyle);
+    }, [field]);
     const changeContent = (value, index) => {
         setField(prevField => {
             if (prevField.content[index]){
@@ -89,11 +101,20 @@ export default function FieldModal({open, addField, receivedField}){
     };
     const sendField = (event) => {
         event.preventDefault();
-        addField({...field});
-        setField({});
+        if ((field.name === '') || (field.type === '') || (field.style === '')){
+            alert('Заполните все поля');
+        }
+        else {
+            addField({...field});
+            setField({});
+        }
+        
+    };
+    const changeFieldValue = (newValue) => {
+        setValue(newValue);
     };
     const content = field.id !== undefined ? <Form onSubmit={sendField}>
-        <Select variant='outlined' value={field.type}  onChange={(event) => setField(prevField => ({...prevField, type: event.target.value}))}>
+        <Select variant='outlined' value={type}  onChange={(event) => setField(prevField => ({...prevField, type: event.target.value}))}>
             <MenuItem disabled>Тип поля</MenuItem>
             {types.map((option, index) => {
                 return(
@@ -103,7 +124,7 @@ export default function FieldModal({open, addField, receivedField}){
                 );
             })}
         </Select>
-        <Select variant='outlined' value={field.style} onChange={(event) => setField(prevField => ({...prevField, style: event.target.value}))}>
+        <Select variant='outlined' value={style} onChange={(event) => setField(prevField => ({...prevField, style: event.target.value}))}>
             <MenuItem disabled>Стиль поля</MenuItem>
             {styles.map((option, index) => {
                 return(
@@ -113,8 +134,8 @@ export default function FieldModal({open, addField, receivedField}){
                 );
             })}
         </Select>
-        <Select variant='outlined' value={field.subStyle} onChange={(event) => setField(prevField => ({...prevField, subStyle: event.target.value}))}>
-            <MenuItem disabled>Доп стиль</MenuItem>
+        <Select variant='outlined' value={subStyle} onChange={(event) => setField(prevField => ({...prevField, subStyle: event.target.value}))}>
+            <MenuItem disabled>Доп. стиль</MenuItem>
             {(field.style !== '') && subStyles[subStyles.findIndex(item => item.name === field.style)].items.map((option, index) => {
                 return(
                     <MenuItem key={index} value={option}>
@@ -137,7 +158,8 @@ export default function FieldModal({open, addField, receivedField}){
                     {content}
                     <FieldInfo field={{...field}} changeContent={changeContent}/>
                     <DefaultBlock>
-                        <DefaultForms field={{...field}}/>
+                        <DefaultForms field={{...field, value: value}}
+                            changeFieldValue= {changeFieldValue}/>
                     </DefaultBlock>
                 </ModalBody>
             </ModalWindow>}

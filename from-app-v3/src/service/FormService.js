@@ -22,7 +22,8 @@ export default class FormService {
     };
     getForm = async (formId) => {
         const form = await this.getResource(`/${formId}`);
-        return this._transformForm(form);
+        // return this._transformForm(form);
+        return form;
     };
     postForm = async (body) => {
         const form = await this.postResource('/form', body);

@@ -61,10 +61,39 @@ const Content = styled.div`
 export default function ModalRules({isOpen, blocks, changeRule, rule}) {
     const classes = useStyles();
     const [tmpRule, setRule] = useState({ruleBlocks: [], fieldBlockId: '', ruleValue: ''});
-    const [types] = useState(['equal','changeValue' ,'']);
+    const [types] = useState(['equal','changeValue']);
+    const [block, setBlock] = useState('');
+    const [field, setField] = useState('');
+    const [type, setType] = useState('');
+    const [value, setValue] = useState('');
+    const [fields, setFields] = useState([]);
     useEffect(() => {
-        setRule({...rule});
+        try{
+            setRule({...rule});
+            setBlock(rule.fieldBlockId);
+            setField(rule.fieldId);
+            setType(rule.ruleType);
+            setValue(rule.ruleValue);
+        }
+        catch (error){
+            console.log(error);
+        }
     }, [rule]);
+    console.log();
+    useEffect(() => {
+        const tmpBlock = blocks.filter(item => item.id === tmpRule.fieldBlockId)[0];
+        if (tmpBlock !== undefined)
+            setFields(prevFields => {
+                let tmpFields = [];
+                tmpBlock.lines.forEach(line => {
+                    line.fields.forEach(field => {
+                        tmpFields = [...tmpFields, field];
+                    });
+                });
+                prevFields = [...tmpFields];
+                return [...prevFields];
+            });
+    }, [tmpRule.fieldBlockId, blocks]);
     useEffect(() => {
         switch(tmpRule.ruleType){
         case('equal'):
@@ -91,7 +120,6 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                         {name: 'false', blocks: []}
                     ]}));
             break;
-        
         case('changeValue'):
             if (tmpRule.ruleBlocks.length === 0)
                 setRule(prevRule => ({ ...prevRule,
@@ -103,15 +131,40 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
             break;
         }
     }, [tmpRule.ruleType, tmpRule.ruleBlocks.length]);
+    useEffect(() => {
+        try{
+            setBlock(tmpRule.fieldBlockId);
+            setField(tmpRule.fieldId);
+            setType(tmpRule.ruleType);
+            setValue(tmpRule.ruleValue);
+        }
+        catch(error){
+            console.log(error);
+        }
+    }, [tmpRule.fieldBlockId, tmpRule.fieldId, tmpRule.ruleType, tmpRule.ruleValue]);
     const addBlock = (event, blockIndex) => {
-        setRule(prevRule => {
-            prevRule.ruleBlocks[blockIndex].blocks.push(blocks[event.target.value].id);
-            return {...prevRule};
-        });
+        try{
+            setRule(prevRule => {
+                prevRule.ruleBlocks[blockIndex].blocks.push(blocks[event.target.value].id);
+                return {...prevRule};
+            });
+        }
+        catch(error){
+            console.log(error);
+        }
     };
     const submitRule = (event) => {
         event.preventDefault();
-        changeRule(tmpRule);
+        try{
+            changeRule(tmpRule);
+        }
+        catch(error){
+            console.log(error);
+        }
+    };
+    const findBlock = (blockId) => {
+        const block = blocks.filter(item => item.id === blockId)[0];
+        return block;
     };
     const content = tmpRule.ruleBlocks !== [] ? <Content>
         {tmpRule.ruleBlocks.map((item, index) => {
@@ -119,14 +172,15 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                 <div key={index}>
                     {item.name}
                     {item.blocks.map(block => {
+                        const fullBlock = findBlock(block);
                         return(
-                            <div key={block.id}>
-                                {block.name}
+                            <div key={fullBlock.id}>
+                                {fullBlock.name}
                             </div>
                         );
                     })}
                     <Select variant='outlined' onChange={(event) => addBlock(event, index)}>
-                        <MenuItem value=''> </MenuItem>
+                        <MenuItem disabled>Выбор блока</MenuItem>
                         {blocks.map((block, blockIndex) => {
                             return(
                                 <MenuItem key={block.id} value={blockIndex} >
@@ -169,34 +223,28 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
             );
         })}
     </Content> : null;
-    const fieldChoice = tmpRule.fieldBlockId !== '' ? <select variant='outlined' value={tmpRule.fieldId} onChange={(event => {
+    const fieldChoice = <Select variant='outlined' value={field} onChange={(event => {
         setRule(prevRule => ({...prevRule, fieldId: event.target.value}));
     })}>
-        <option value={null}> </option>
-        {blocks.filter(item => item.id === tmpRule.fieldBlockId)[0].lines.map((line) => {
+        <MenuItem disabled>Выбрать поле</MenuItem>
+        {fields.map((field) => {
             return(
-                <Fragment key={line.line}>
-                    {line.fields.map((field) => {
-                        return(
-                            <option key={field.id} value={field.id}>
-                                {field.name}
-                            </option>
-                        );
-                    })}
-                </Fragment>
+                <MenuItem key={field.id} value={field.id}>
+                    {field.name}
+                </MenuItem>
             );
         })}
-    </select> : null;
+    </Select>;
     return (
         <Fragment>
             {isOpen &&
                 <ModalWindow>
                     <ModalBody>
                         <Form onSubmit={submitRule}>
-                            <Select variant='outlined' value={tmpRule.fieldBlockId} onChange={(event => {
+                            <Select variant='outlined' value={block} onChange={(event => {
                                 setRule(prevRule => ({...prevRule, fieldBlockId: event.target.value}));
                             })}>
-                                <MenuItem value={null}> </MenuItem>
+                                <MenuItem disabled>Выбрать блок</MenuItem>
                                 {blocks.map((block) => {
                                     return(
                                         <MenuItem key={block.id} value={block.id}>
@@ -206,7 +254,8 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                                 })}
                             </Select>
                             {fieldChoice}
-                            <Select variant='outlined' value={tmpRule.ruleType} onChange={(event) => setRule(prevRule => ({...prevRule, ruleType: event.target.value}))}>
+                            <Select variant='outlined' value={type} onChange={(event) => setRule(prevRule => ({...prevRule, ruleType: event.target.value}))}>
+                                <MenuItem disabled>Выбрать тип</MenuItem>
                                 {types.map((option, index) => {
                                     return (
                                         <MenuItem key={index} value={option}>
@@ -216,7 +265,7 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                                 })}
                             </Select>
                             <ThemeProvider theme={theme}>
-                                <TextField variant='outlined' value={tmpRule.ruleValue} onChange={(event => setRule(prevRule => ({...prevRule, ruleValue: event.target.value})))}/>
+                                <TextField variant='outlined' value={value} onChange={(event => setRule(prevRule => ({...prevRule, ruleValue: event.target.value})))}/>
                             </ThemeProvider>
                             <Button variant='outlined' className={classes.button} onClick={submitRule}>Завершить создание</Button>
                         </Form>
