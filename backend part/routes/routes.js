@@ -7,8 +7,13 @@ const Field = require('../models/Field');
 router.post('/form', async (req, res) => {
         try{
             const content = req.body.form
-            const newForm = new Form({id: content.id, lines: content.lines, name: content.name, blocks: req.body.blocks})
-            await newForm.save();
+            const neww = await Form.findOne({id: content.id})
+            console.log(neww)
+            if (neww === null) {
+                const newForm = new Form({id: content.id, lines: content.lines, name: content.name, blocks: req.body.blocks})
+                await newForm.save();
+            }
+            else await Form.findOneAndUpdate({id: content.id}, {id: content.id, lines: content.lines, name: content.name, blocks: req.body.blocks})
             return res.json({message: 'Форма добавлена'})
         }
         catch(e){

@@ -31,6 +31,24 @@ const ModalWindow = styled.div`
     left: 0;
 `;
 
+const ListDiv = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+const ContentRuleName = styled.h3`
+    margin-bottom: 10px;
+`;
+
+const BlocksList = styled.div`
+    display: flex;
+    flex-direction: column;
+`;
+
+const ListItem = styled.div`
+    margin-bottom: 10px;
+`;
+
 const ModalBody = styled.div`
     display: flex;
     flex-direction: column;
@@ -38,14 +56,14 @@ const ModalBody = styled.div`
     border-radius: 12px;
     background-color: white;
     height: 600px;
-    width: 800px;
+    width: 1000px;
 `;
 
 const Form = styled.div`
     display: flex;
     justify-content: space-around;
     align-items: center;
-    width: 800px;
+    width: 1000px;
     margin-bottom: 30px;
     border-bottom: 1px solid black;
     padding-bottom: 50px;
@@ -169,18 +187,22 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
     const content = tmpRule.ruleBlocks !== [] ? <Content>
         {tmpRule.ruleBlocks.map((item, index) => {
             return(
-                <div key={index}>
-                    {item.name}
-                    {item.blocks.map(block => {
-                        const fullBlock = findBlock(block);
-                        return(
-                            <div key={fullBlock.id}>
-                                {fullBlock.name}
-                            </div>
-                        );
-                    })}
-                    <Select variant='outlined' onChange={(event) => addBlock(event, index)}>
-                        <MenuItem disabled>Выбор блока</MenuItem>
+                <ListDiv key={index}>
+                    <ContentRuleName>
+                        {item.name}
+                    </ContentRuleName>
+                    <BlocksList>
+                        {item.blocks.map(block => {
+                            const fullBlock = findBlock(block);
+                            return(
+                                <ListItem key={fullBlock.id}>
+                                    {fullBlock.name}
+                                </ListItem>
+                            );
+                        })}
+                    </BlocksList>
+                    <Select displayEmpty variant='outlined' value={''} onChange={(event) => addBlock(event, index)}>
+                        <MenuItem disabled value=''>Выбор блока</MenuItem>
                         {blocks.map((block, blockIndex) => {
                             return(
                                 <MenuItem key={block.id} value={blockIndex} >
@@ -219,14 +241,14 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                                 })
                             }/>
                         </>}
-                </div>
+                </ListDiv>
             );
         })}
     </Content> : null;
-    const fieldChoice = <Select variant='outlined' value={field} onChange={(event => {
+    const fieldChoice = <Select displayEmpty variant='outlined' value={field} onChange={(event => {
         setRule(prevRule => ({...prevRule, fieldId: event.target.value}));
     })}>
-        <MenuItem disabled>Выбрать поле</MenuItem>
+        <MenuItem disabled value=''>Выбрать поле</MenuItem>
         {fields.map((field) => {
             return(
                 <MenuItem key={field.id} value={field.id}>
@@ -241,10 +263,10 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                 <ModalWindow>
                     <ModalBody>
                         <Form onSubmit={submitRule}>
-                            <Select variant='outlined' value={block} onChange={(event => {
+                            <Select displayEmpty variant='outlined' value={block} onChange={(event => {
                                 setRule(prevRule => ({...prevRule, fieldBlockId: event.target.value}));
                             })}>
-                                <MenuItem disabled>Выбрать блок</MenuItem>
+                                <MenuItem value='' disabled>Выбрать блок</MenuItem>
                                 {blocks.map((block) => {
                                     return(
                                         <MenuItem key={block.id} value={block.id}>
@@ -254,8 +276,10 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                                 })}
                             </Select>
                             {fieldChoice}
-                            <Select variant='outlined' value={type} onChange={(event) => setRule(prevRule => ({...prevRule, ruleType: event.target.value}))}>
-                                <MenuItem disabled>Выбрать тип</MenuItem>
+                            <Select displayEmpty variant='outlined' value={type} onChange={(event) => setRule(prevRule => ({...prevRule, ruleType: event.target.value}))}>
+                                <MenuItem disabled value=''>
+                                    Выбрать тип
+                                </MenuItem>
                                 {types.map((option, index) => {
                                     return (
                                         <MenuItem key={index} value={option}>
@@ -265,7 +289,7 @@ export default function ModalRules({isOpen, blocks, changeRule, rule}) {
                                 })}
                             </Select>
                             <ThemeProvider theme={theme}>
-                                <TextField variant='outlined' value={value} onChange={(event => setRule(prevRule => ({...prevRule, ruleValue: event.target.value})))}/>
+                                <TextField variant='outlined' value={value} label={'Значение правила'} onChange={(event => setRule(prevRule => ({...prevRule, ruleValue: event.target.value})))}/>
                             </ThemeProvider>
                             <Button variant='outlined' className={classes.button} onClick={submitRule}>Завершить создание</Button>
                         </Form>

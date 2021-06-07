@@ -39,7 +39,8 @@ export default function RenderForm() {
     useEffect(() => {
         formService
             .getForm(localStorage.getItem('formId'))
-            .then(updateForm);
+            .then(updateForm)
+            .catch(error => alert(error));
     }, []);
     const changeFieldValue = (line, blockId, blockline, fieldId, value) => {
         setAllBlocks(prevBlocks => {

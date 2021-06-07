@@ -5,7 +5,7 @@ import RuleConstruct from '../rule-construct/rule-construct';
 import { BrowserRouter as Router, Route, Link } from 'react-router-dom';
 import FormConstruct from '../form-construct/form-construct';
 import RenderForm from '../render-from/render-form';
-import { Button } from '@material-ui/core';
+import { Button, Select, MenuItem } from '@material-ui/core';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
 import FormService from '../../service/FormService';
 import { makeStyles } from '@material-ui/core/styles';
@@ -49,6 +49,9 @@ export default function App() {
     const [rules, setRules] = useState([]);
     const [forms, setForms] = useState([]);
     const [formId, setFormId] = useState('');
+    const [formName, setFormName] = useState('');
+    const [formLines, setFormLines] = useState([]);
+    const [name, setName] = useState('');
     const updateBlocks = (newBlocks) => {
         try{
             setBlocks(newBlocks);
@@ -81,7 +84,8 @@ export default function App() {
         try{
             formService
                 .getAllForms()
-                .then(updateFormList);
+                .then(updateFormList)
+                .catch(error => alert(error));
         }
         catch(error){
             alert(error);
@@ -93,6 +97,9 @@ export default function App() {
     const updateForm = (form) => {
         try{
             setBlocks(form.blocks);
+            setFormLines(form.lines);
+            setFormName(form.id);
+            setName(form.name);
             setRules(prevRules => {
                 let rules = [];
                 form.lines.forEach(line => {
@@ -116,14 +123,20 @@ export default function App() {
         }
     };
     const selectForm = (event) => {
-        try{
+        if (event.target.value === 'default'){
+            setRules([]);
+            setBlocks([]);
+            setFormId(null);
+            setFormName('default');
+        }
+        else {
             setFormId(event.target.value);
+            setRules([]);
+            setBlocks([]);
             formService
                 .getForm(event.target.value)
-                .then(updateForm);
-        }
-        catch(error){
-            alert(error);
+                .then(updateForm)
+                .catch(error => alert(error));
         }
     };
     const renderFunc = () => {
@@ -135,13 +148,15 @@ export default function App() {
             <Route path="/" exact>
                 <TopBlock>
                     <Link to='/moveBlocks'>Сформировать форму</Link>
-                    <select onChange={selectForm}>
+                    <Select displayEmpty variant='outlined' value={formName} onChange={selectForm}>
+                        <MenuItem disabled value=''>Выбрать форму</MenuItem>
+                        <MenuItem value='default'>Создать новую форму</MenuItem>
                         {forms.map(form => {
                             return(
-                                <option key={form.id} value={form.id}>{form.name}</option>
+                                <MenuItem key={form.id} value={form.id}>{form.name}</MenuItem>
                             );
                         })}
-                    </select>
+                    </Select>
                     <Button
                         variant="outlined"
                         color="default"
@@ -163,7 +178,7 @@ export default function App() {
             </Route>
             <Route path="/moveBlocks">
                 <Link to='/render'>Отрисовать полученную форму</Link>
-                <FormConstruct getBlocks={blocks} getRules={rules}/>
+                <FormConstruct formId={formId} formName={name} formLines={formLines} getBlocks={blocks} getRules={rules}/>
             </Route>
             <Route path="/render">
                 <Link to='/'>Создать блоки</Link>

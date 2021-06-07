@@ -20,7 +20,8 @@ const useStyles = makeStyles(() => ({
         width: '100px',
     },
     grid: {
-        width: '50%',
+        marginLeft: '30px',
+        width: '100%',
         marginBottom: '24px',
     },
     paper: {
@@ -56,7 +57,7 @@ const Form = styled.form`
 `;
 
 const JsonDiv = styled.pre`
-    width: 100%;
+    width: 60%;
     margin-left: 100px;
 `;
 
@@ -83,7 +84,7 @@ const BottomPanel = styled.div`
     margin-top: 20px;
 `;
 
-export default function FormConstruct({getBlocks, getRules}) {
+export default function FormConstruct({formId, formName, formLines, getBlocks, getRules}) {
     const classes = useStyles();
     const [blocks, setBlocks] = useState([]);
     const [rules, setRules] = useState([]);
@@ -92,13 +93,34 @@ export default function FormConstruct({getBlocks, getRules}) {
     const [line, setline] = useState('');
     const [formJson, setFormJson] = useState('');
     const [name, setName] = useState('');
+    const [fieldBlock, setFieldBlock] = useState('');
+    const [ruleBlock, setRuleBlock] = useState('');
+    const [id, setId] = useState('');
     const formService = new FormService();
     const updateForm = () => {
-        const id = nextId();
-        localStorage.setItem('formId', `${id}+${name}`);
-        formService
-            .postForm(JSON.stringify({form: {name: name, id: `${id}+${name}`, lines: allBlocks}, blocks: blocks}));
+        try{
+            formService
+                .postForm(JSON.stringify({form: {name: name, id: id, lines: allBlocks}, blocks: blocks}))
+                .catch(error => {
+                    alert(error);
+                });
+            localStorage.setItem('formId', id);
+        }
+        catch(error){
+            alert(error);
+        }
     };
+    useEffect(() => {
+        console.log(formLines);
+        setAllBlocks(formLines);
+        setName(formName);
+        if (formId === ''){
+            const newId = nextId();
+            const rnd = Math.floor(Math.random()*100);
+            setId(`${newId}${rnd}`);
+        }
+        else setId(formId);
+    }, [formLines, formName, formId]);
     useEffect(() => {
         setBlocks(getBlocks);
         setRules(getRules);
@@ -106,8 +128,18 @@ export default function FormConstruct({getBlocks, getRules}) {
     useEffect(() => {
         setFormJson(JSON.stringify(allBlocks, null, 4));
     }, [allBlocks]);
+    const addRuleBlock = (event) => {
+        setBlock(rules[event.target.value]);
+        setRuleBlock(event.target.value);
+    };
+    const addFieldBlock = (event) => {
+        setFieldBlock(event.target.value);
+        setBlock(blocks[event.target.value]);
+    };
     const addBlock = (event) => {
         event.preventDefault();
+        setFieldBlock('');
+        setRuleBlock('');
         if (event.target.value !== null) {
             setAllBlocks((prevBlocks) => {
                 const index = allBlocks.findIndex((item) => item.line === line);
@@ -132,7 +164,12 @@ export default function FormConstruct({getBlocks, getRules}) {
         });
     };
     const renderSteps = () => {
-        updateForm();
+        try{
+            updateForm();
+        }
+        catch(error){
+            alert(error);
+        }
     };
     const content =
     allBlocks.length > 0
@@ -173,10 +210,12 @@ export default function FormConstruct({getBlocks, getRules}) {
                             />
                         </ThemeProvider>
                         <Select
+                            value={fieldBlock}
+                            displayEmpty
                             variant="outlined"
-                            onChange={(event) => setBlock(blocks[event.target.value])}
+                            onChange={addFieldBlock}
                         >
-                            <MenuItem value={null}> </MenuItem>
+                            <MenuItem disabled value=''>Выбрать блок полей</MenuItem>
                             {blocks.map((block, index) => (
                                 <MenuItem key={block.id} value={index}>
                                     {block.name}
@@ -184,10 +223,12 @@ export default function FormConstruct({getBlocks, getRules}) {
                             ))}
                         </Select>
                         <Select
+                            displayEmpty
+                            value={ruleBlock}
                             variant="outlined"
-                            onChange={(event) => setBlock(rules[event.target.value])}
+                            onChange={addRuleBlock}
                         >
-                            <MenuItem value={null}> </MenuItem>
+                            <MenuItem disabled value=''>Выбрать блок правил</MenuItem>
                             {rules.map((rule, index) => (
                                 <MenuItem key={rule.id} value={index}>
                                     {rule.name}

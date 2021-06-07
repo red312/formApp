@@ -66,7 +66,7 @@ const ModalBody = styled.div`
     border-radius: 12px;
     background-color: white;
     height: 600px;
-    width: 800px;
+    width: 1000px;
     overflow: auto;
     ::-webkit-scrollbar{
         width:0;
@@ -98,7 +98,7 @@ const ContentBlock = styled.div`
     flex-direction: column;
     justify-content: center;
     width: 500px;
-    margin-left: 150px;
+    margin-left: 250px;
 `;
 
 const FieldName = styled.div`

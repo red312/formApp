@@ -14,7 +14,7 @@ const theme = createMuiTheme({
 });
 
 const FormInput = styled.div`
-    width: 800px;
+    width: 1000px;
     height: 200px;
     border-bottom: 1px solid black;
     margin-bottom: 50px;
@@ -37,8 +37,8 @@ export default function FieldInfo({field, changeContent}){
     switch(field.style){
     case('INPUT'):
         content = <FormInput>
-            <Select variant='outlined' value={style[0]} onChange={(event) => changeContent(event.target.value, 0)}>
-                <MenuItem disabled>Выберите картинку</MenuItem>
+            <Select displayEmpty variant='outlined' value={style[0]} onChange={(event) => changeContent(event.target.value, 0)}>
+                <MenuItem disabled value=''>Выберите картинку</MenuItem>
                 <MenuItem value={'Profile'}>Profile</MenuItem>
                 <MenuItem value={'Date'}>Date</MenuItem>
                 <MenuItem value={'Place'}>Place</MenuItem>

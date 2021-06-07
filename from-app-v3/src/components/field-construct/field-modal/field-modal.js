@@ -54,7 +54,7 @@ const ModalBody = styled.div`
     border-radius: 12px;
     background-color: white;
     height: 600px;
-    width: 800px;
+    width: 1000px;
 `;
 
 const Form = styled.div`
@@ -92,11 +92,8 @@ export default function FieldModal({open, addField, receivedField}){
     }, [field]);
     const changeContent = (value, index) => {
         setField(prevField => {
-            if (prevField.content[index]){
-                prevField.content.splice(index, 1, value);
-                return {...prevField};
-            }
-            return {...prevField, content: [...prevField.content, value]};
+            prevField.content[index] = value;
+            return {...prevField};
         });
     };
     const sendField = (event) => {
@@ -114,8 +111,8 @@ export default function FieldModal({open, addField, receivedField}){
         setValue(newValue);
     };
     const content = field.id !== undefined ? <Form onSubmit={sendField}>
-        <Select variant='outlined' value={type}  onChange={(event) => setField(prevField => ({...prevField, type: event.target.value}))}>
-            <MenuItem disabled>Тип поля</MenuItem>
+        <Select displayEmpty variant='outlined' value={type}  onChange={(event) => setField(prevField => ({...prevField, type: event.target.value}))}>
+            <MenuItem disabled value=''>Тип поля</MenuItem>
             {types.map((option, index) => {
                 return(
                     <MenuItem key={index} value={option}>
@@ -124,8 +121,8 @@ export default function FieldModal({open, addField, receivedField}){
                 );
             })}
         </Select>
-        <Select variant='outlined' value={style} onChange={(event) => setField(prevField => ({...prevField, style: event.target.value}))}>
-            <MenuItem disabled>Стиль поля</MenuItem>
+        <Select displayEmpty variant='outlined' value={style} onChange={(event) => setField(prevField => ({...prevField, style: event.target.value}))}>
+            <MenuItem disabled value=''>Стиль поля</MenuItem>
             {styles.map((option, index) => {
                 return(
                     <MenuItem key={index} value={option}>
@@ -134,8 +131,8 @@ export default function FieldModal({open, addField, receivedField}){
                 );
             })}
         </Select>
-        <Select variant='outlined' value={subStyle} onChange={(event) => setField(prevField => ({...prevField, subStyle: event.target.value}))}>
-            <MenuItem disabled>Доп. стиль</MenuItem>
+        <Select displayEmpty variant='outlined' value={subStyle} onChange={(event) => setField(prevField => ({...prevField, subStyle: event.target.value}))}>
+            <MenuItem disabled value=''>Доп. стиль</MenuItem>
             {(field.style !== '') && subStyles[subStyles.findIndex(item => item.name === field.style)].items.map((option, index) => {
                 return(
                     <MenuItem key={index} value={option}>
